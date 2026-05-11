@@ -17,7 +17,7 @@ CatalogParser::CatalogParser(const std::string& path):
 
 void CatalogParser::parse()
 {
-    for (const auto& entry : fs::recursive_directory_iterator(m_root)) {
+    for (const auto& entry : fs::recursive_directory_iterator(m_root, fs::directory_options::skip_permission_denied)) {
         std::string ext = entry.path().extension().string();
         if (ext == "") continue;
 
