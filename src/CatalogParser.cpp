@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 #include <iostream> // remove
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -19,33 +20,32 @@ void CatalogParser::parse()
     for (const auto& entry : fs::recursive_directory_iterator(m_root)) {
         std::string ext = entry.path().extension().string();
         if (ext == "") continue;
-        extension_check(m_images_exts, ext, "Image");
+
+        auto instance = m_exts.find(ext);
+        if(instance != m_exts.end())
+            std::cout<<instance->second<<" : "<<instance->first<<'\n';
     }
 }
 
-void CatalogParser::extension_check(
-        const std::unordered_set<std::string>& exts_set,
-        const std::string& ext,
-        const std::string typo
-    )
-    {
-        if(exts_set.find(ext) != exts_set.end())
-            std::cout<<typo<<" : "<< ext<<'\n';
-    }
-
 void CatalogParser::initialize_exts_default()
 {
-    m_audio_exts = {
+    std::vector<std::string> audio_exts = {
         ".mp3",
         ".wav"
     };
-    m_video_exts = {
+    for(const std::string ext: audio_exts)
+        m_exts[ext] = "audio";
+    std::vector<std::string> video_exts = {
         ".mp4",
         ".mpg"
     };
-    m_images_exts = {
+    for(const std::string ext: video_exts)
+        m_exts[ext] = "video";
+    std::vector<std::string> images_exts = {
         ".jpg",
         ".jpeg",
         ".png"
     };
+    for(const std::string ext: images_exts)
+        m_exts[ext] = "images";
 }

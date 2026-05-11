@@ -3,7 +3,7 @@
 
 #include <string>
 #include <filesystem>
-#include <unordered_set>
+#include <unordered_map>
 
 /* CatalogParser is used to iterate throw directory recursively and list files.
 * It receives path to the root directory and then iterates throw it, returning
@@ -18,9 +18,7 @@ public:
 
 private:
     std::filesystem::path m_root;
-    std::unordered_set<std::string> m_audio_exts;
-    std::unordered_set<std::string> m_video_exts;
-    std::unordered_set<std::string> m_images_exts;
+    std::unordered_map<std::string, std::string> m_exts;
 
 private:
 
@@ -28,14 +26,6 @@ private:
     * with small amount of default known extensions
     */
     void initialize_exts_default();
-
-    /* Checks if ext is in exts set.
-    */
-    void extension_check(
-        const std::unordered_set<std::string>& exts_set,
-        const std::string& ext,
-        const std::string typo
-    );
 };
 
 #endif //_CATALOG_PARSER_HPP
