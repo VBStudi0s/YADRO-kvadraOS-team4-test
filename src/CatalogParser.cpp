@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace fs = std::filesystem;
+using MediaMap = std::unordered_map<std::string, std::vector<std::string>>;
 
 CatalogParser::CatalogParser(const std::string& path):
     m_root(path)
@@ -17,14 +18,34 @@ CatalogParser::CatalogParser(const std::string& path):
 
 void CatalogParser::parse()
 {
+    std::shared_ptr<MediaMap> cur_found_files = std::make_shared<MediaMap>(get_default_media_map());
     for (const auto& entry : fs::recursive_directory_iterator(m_root, fs::directory_options::skip_permission_denied)) {
         std::string ext = entry.path().extension().string();
         if (ext == "") continue;
 
         auto instance = m_exts.find(ext);
         if(instance != m_exts.end())
-            std::cout<<instance->second<<" : "<<instance->first<<'\n';
+            (*cur_found_files)[instance->second].push_back(entry.path().filename().string());
     }
+
+    // consider about setting a mutex here
+    m_found_files = std::move(cur_found_files);
+}
+
+nlohmann::json CatalogParser::serialize()
+{
+    std::shared_ptr<std::unordered_map<std::string, std::vector<std::string>>> payload;
+    // consider about setting a mutex here
+    payload = m_found_files;
+    return nlohmann::json(*payload);
+}
+
+MediaMap CatalogParser::get_default_media_map()
+{
+    MediaMap map;
+    for(const auto& p: m_exts)
+        map[p.second] = {};
+    return map;
 }
 
 void CatalogParser::initialize_exts_default()

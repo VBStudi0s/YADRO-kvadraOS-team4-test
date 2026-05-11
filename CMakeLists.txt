@@ -10,5 +10,5 @@ add_executable(media_list
     src/CatalogParser.cpp
 )
 
-target_include_directories(media_list PRIVATE include)
+target_include_directories(media_list PRIVATE include thirdparty)
 

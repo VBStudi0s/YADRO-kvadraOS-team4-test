@@ -4,6 +4,10 @@
 #include <string>
 #include <filesystem>
 #include <unordered_map>
+#include <vector>
+#include <memory>
+
+#include <nlohmann_json/json.hpp>
 
 /* CatalogParser is used to iterate throw directory recursively and list files.
 * It receives path to the root directory and then iterates throw it, returning
@@ -16,9 +20,14 @@ public:
 
     void parse();
 
+    nlohmann::json serialize();
+
 private:
+    using MediaMap = std::unordered_map<std::string, std::vector<std::string>>;
+
     std::filesystem::path m_root;
     std::unordered_map<std::string, std::string> m_exts;
+    std::shared_ptr<MediaMap> m_found_files;
 
 private:
 
@@ -26,6 +35,9 @@ private:
     * with small amount of default known extensions
     */
     void initialize_exts_default();
+
+    MediaMap get_default_media_map();
+
 };
 
 #endif //_CATALOG_PARSER_HPP
