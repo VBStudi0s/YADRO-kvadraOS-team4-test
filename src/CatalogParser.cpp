@@ -1,7 +1,8 @@
 #include "CatalogParser.hpp"
 #include <stdexcept>
-
 #include <vector>
+
+#include "Extensions.hpp"
 
 namespace fs = std::filesystem;
 using MediaMap = std::unordered_map<std::string, std::vector<std::string>>;
@@ -66,23 +67,11 @@ MediaMap CatalogParser::get_default_media_map()
 
 void CatalogParser::initialize_exts_default()
 {
-    std::vector<std::string> audio_exts = {
-        ".mp3",
-        ".wav"
-    };
-    for(const std::string ext: audio_exts)
+
+    for(const std::string ext: AUDIO_EXTS)
         m_exts[ext] = "audio";
-    std::vector<std::string> video_exts = {
-        ".mp4",
-        ".mpg"
-    };
-    for(const std::string ext: video_exts)
+    for(const std::string ext: VIDEO_EXTS)
         m_exts[ext] = "video";
-    std::vector<std::string> images_exts = {
-        ".jpg",
-        ".jpeg",
-        ".png"
-    };
-    for(const std::string ext: images_exts)
+    for(const std::string ext: IMAGES_EXTS)
         m_exts[ext] = "images";
 }
