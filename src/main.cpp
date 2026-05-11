@@ -49,16 +49,17 @@ int main(int argc, char** argv)
     try
     {
         CatalogParser parser(path);
-
+        auto next_run = std::chrono::steady_clock::now();
         while(1)
         {
+            next_run += period_ms;
             parser.parse();
 
             std::ofstream to_load(".media_files");
             to_load << parser.serialize();
             std::cout<<parser.serialize()<<'\n';
 
-            std::this_thread::sleep_for(period_ms);
+            std::this_thread::sleep_until(next_run);
         }
     }
     catch(std::exception& e)
