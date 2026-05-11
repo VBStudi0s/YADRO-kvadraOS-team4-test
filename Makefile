@@ -1,7 +1,7 @@
 .PHONY: build
 
 build:
-	mkdir build && cd build && cmake .. && make
+	mkdir -p build && cd build && cmake .. && make
 
 run:
 	./build/media_list

@@ -1,7 +1,10 @@
 #include <iostream>
 
+#include "CatalogParser.hpp"
+
 int main()
 {
-    std::cout<<"Hello, world!\n";
+    CatalogParser parser("/home");
+    parser.parse();
     return 0;
 }
