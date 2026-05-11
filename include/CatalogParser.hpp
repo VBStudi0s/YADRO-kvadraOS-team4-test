@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 #include <memory>
+#include <mutex>
 
 #include <nlohmann_json/json.hpp>
 
@@ -16,7 +17,10 @@
 class CatalogParser
 {
 public:
+    CatalogParser();
     CatalogParser(const std::string& path);
+
+    void set_root_path(const std::string& path);
 
     void parse();
 
@@ -28,6 +32,8 @@ private:
     std::filesystem::path m_root;
     std::unordered_map<std::string, std::string> m_exts;
     std::shared_ptr<MediaMap> m_found_files;
+
+    std::mutex m_found_files_mutex;
 
 private:
 

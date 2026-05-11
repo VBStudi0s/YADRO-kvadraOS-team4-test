@@ -1,7 +1,6 @@
 #include "CatalogParser.hpp"
 #include <stdexcept>
 
-#include <iostream> // remove
 #include <vector>
 
 namespace fs = std::filesystem;
@@ -16,6 +15,18 @@ CatalogParser::CatalogParser(const std::string& path):
     initialize_exts_default();
 }
 
+CatalogParser::CatalogParser()
+{
+    initialize_exts_default();
+}
+
+void CatalogParser::set_root_path(const std::string& path)
+{
+    m_root = path;
+    if(!fs::exists(m_root) || !fs::is_directory(m_root))
+        throw std::runtime_error("'" + path + "' does not exist or is not a directory");
+}
+
 void CatalogParser::parse()
 {
     std::shared_ptr<MediaMap> cur_found_files = std::make_shared<MediaMap>(get_default_media_map());
@@ -28,15 +39,20 @@ void CatalogParser::parse()
             (*cur_found_files)[instance->second].push_back(entry.path().filename().string());
     }
 
-    // consider about setting a mutex here
+    std::lock_guard lk(m_found_files_mutex);
     m_found_files = std::move(cur_found_files);
 }
 
 nlohmann::json CatalogParser::serialize()
 {
     std::shared_ptr<std::unordered_map<std::string, std::vector<std::string>>> payload;
-    // consider about setting a mutex here
-    payload = m_found_files;
+    {
+        std::lock_guard lk(m_found_files_mutex);
+        payload = m_found_files;
+    }
+    if (!payload) {
+        return nlohmann::json::object();
+    }
     return nlohmann::json(*payload);
 }
 
