@@ -33,6 +33,7 @@ void CatalogParser::parse()
     std::shared_ptr<MediaMap> cur_found_files = std::make_shared<MediaMap>(get_default_media_map());
     for (const auto& entry : fs::recursive_directory_iterator(m_root, fs::directory_options::skip_permission_denied)) {
         std::string ext = entry.path().extension().string();
+        std::transform(ext.begin(), ext.end(), ext.begin(), [](const char c){ return std::tolower(c); });
         if (ext == "") continue;
 
         auto instance = m_exts.find(ext);
@@ -44,7 +45,7 @@ void CatalogParser::parse()
     m_found_files = std::move(cur_found_files);
 }
 
-nlohmann::json CatalogParser::serialize()
+nlohmann::json CatalogParser::serialize() const
 {
     std::shared_ptr<std::unordered_map<std::string, std::vector<std::string>>> payload;
     {
@@ -57,7 +58,7 @@ nlohmann::json CatalogParser::serialize()
     return nlohmann::json(*payload);
 }
 
-MediaMap CatalogParser::get_default_media_map()
+MediaMap CatalogParser::get_default_media_map() const
 {
     MediaMap map;
     for(const auto& p: m_exts)

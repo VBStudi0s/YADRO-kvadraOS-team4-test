@@ -31,35 +31,44 @@ void setup(int argc, char** argv, SetupSettings& settings)
         return std::string(argv[++i]);
     };
 
-    for (int i = 1; i < argc; ++i)
+    try
     {
-        std::string a = argv[i];
-        if (a == "--path") settings.path = need_arg(i, "--path");
-        else if (a == "--period")
+        for (int i = 1; i < argc; ++i)
         {
-            int period = std::stoi(need_arg(i, "--period"));
-            if(period <= 0)
+            std::string a = argv[i];
+            if (a == "--path") settings.path = need_arg(i, "--path");
+            else if (a == "--period")
             {
-                std::cerr << "Invalid period value\n";
+                int period = std::stoi(need_arg(i, "--period"));
+                if(period <= 0)
+                {
+                    std::cerr << "Invalid period value\n";
+                    std::exit(2);
+                }
+                settings.period_ms = std::chrono::milliseconds(period);
+            }
+            else {
+                std::cerr << "Unknown arg: " << a << "\n";
+                USAGE();
                 std::exit(2);
             }
-            settings.period_ms = std::chrono::milliseconds(period);
         }
-        else {
-            std::cerr << "Unknown arg: " << a << "\n";
-            USAGE();
-            std::exit(2);
-        }
+    }
+    catch(std::exception& e)
+    {
+        std::cerr<<"Params error: "<<e.what()<<'\n';
+        USAGE();
+        std::exit(2);
     }
 }
 
-void parser_thread_worker(const SetupSettings& settings, CatalogParser& parser)
+void parser_thread_worker(std::stop_token stoken, const SetupSettings& settings, CatalogParser& parser)
 {
     try
     {
         parser.set_root_path(settings.path);
         auto next_run = std::chrono::steady_clock::now();
-        while(1)
+        while(!stoken.stop_requested())
         {
             next_run += settings.period_ms;
             parser.parse();
@@ -88,10 +97,8 @@ int main(int argc, char** argv)
     });
 
     // starting parser thread
-    std::thread parser_thread(parser_thread_worker, std::ref(settings), std::ref(parser));
-    parser_thread.detach();
+    std::jthread parser_thread(parser_thread_worker, std::ref(settings), std::ref(parser));
 
     svr.listen("127.0.0.1", 1234);
-
     return 0;
 }

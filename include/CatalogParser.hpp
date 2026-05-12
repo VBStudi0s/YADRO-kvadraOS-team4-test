@@ -24,7 +24,7 @@ public:
 
     void parse();
 
-    nlohmann::json serialize();
+    nlohmann::json serialize() const;
 
 private:
     using MediaMap = std::unordered_map<std::string, std::vector<std::string>>;
@@ -33,7 +33,7 @@ private:
     std::unordered_map<std::string, std::string> m_exts;
     std::shared_ptr<MediaMap> m_found_files;
 
-    std::mutex m_found_files_mutex;
+    mutable std::mutex m_found_files_mutex;
 
 private:
 
@@ -42,7 +42,7 @@ private:
     */
     void initialize_exts_default();
 
-    MediaMap get_default_media_map();
+    MediaMap get_default_media_map() const;
 
 };
 
